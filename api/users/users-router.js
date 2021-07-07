@@ -50,11 +50,16 @@ router.put('/:id', [validateUserId, validateUser], (req, res) => {
   // this needs a middleware to verify user id
   // and another middleware to check that the request body is valid
   const { id } = req.params;
-  const neoUser = req.body;
-
+  let neoUser = req.body;
+      
   users.update(id, neoUser)
     .then(() => {
-      res.status(201).json(neoUser);
+      users.getById(id)
+        .then((record)=> {
+          res.status(201).json(record);
+        }).catch(() => {
+          res.status(500).json({ message: "Undefined user server error." })
+        })
     }).catch(() => {
       res.status(500).json({ message: "Undefined server error." })
     })
@@ -64,13 +69,12 @@ router.delete('/:id', validateUserId, (req, res) => {
   // RETURN THE FRESHLY DELETED USER OBJECT
   // this needs a middleware to verify user id
   const { id } = req.params;
-  const neoUser = users.getById(id);
-
+  
   users.remove(id)
     .then(() => {
-      res.status(200).json(neoUser);
+      res.status(200).json(req.user);
     }).catch(() => {
-      res.status(500).json({ message: "Undefined server error." })
+      res.status(500).json({ message: "Undefined delete from server error." })
     })
 });
 
@@ -79,7 +83,7 @@ router.get('/:id/posts', validateUserId, (req, res) => {
   // this needs a middleware to verify user id
   const { id } = req.params;
 
-  posts.getById(id)
+  posts.getByUserId(id)
     .then((resp) => {
       res.status(200).json(resp);
     }).catch(() => {
@@ -91,8 +95,10 @@ router.post('/:id/posts', [validateUserId, validatePost], (req, res) => {
   // RETURN THE NEWLY CREATED USER POST
   // this needs a middleware to verify user id
   // and another middleware to check that the request body is valid
-  const { post } = req.body;
-
+  const { id } = req.params;
+  const post = req.body;
+  post.user_id = id;
+  
   posts.insert(post)
     .then((resp) => {
       res.status(201).json(resp);

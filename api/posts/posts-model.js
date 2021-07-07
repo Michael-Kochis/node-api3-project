@@ -3,6 +3,7 @@ const db = require('../../data/db-config');
 module.exports = {
   get,
   getById,
+  getByUserId,
   insert,
   update,
   remove,
@@ -18,10 +19,15 @@ function getById(id) {
     .first();
 }
 
+function getByUserId(user_id) {
+  return db('posts')
+    .where({user_id});
+}
+
 function insert(post) {
   return db('posts')
     .insert(post)
-    .then(ids => {
+    .then((ids) => {
       return getById(ids[0]);
     });
 }
