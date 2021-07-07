@@ -38,13 +38,13 @@ function update(id, changes) {
   return db('users')
     .where({ id })
     .update(changes)
-    .then(rows => {
+    .then(() => {
       return getById(id);
     });
 }
 
-function remove(id) {
+function remove(key) {
   return db('users')
-    .where('id', id)
+    .where({id: key})
     .del();
 }
